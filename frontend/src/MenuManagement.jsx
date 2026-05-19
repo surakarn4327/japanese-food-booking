@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { supabase } from "./supabase";
 import { Link } from "react-router-dom";
 import "./Admin.css";
@@ -7,29 +7,25 @@ function MenuManagement() {
   const [menus, setMenus] = useState([]);
   const [newMenu, setNewMenu] = useState("");
 
-  useEffect(() => {
-    fetchMenus();
-
-    // Subscribe to real-time menu updates
-    const subscription = supabase
-      .from("menus")
-      .on("*", (payload) => {
-        fetchMenus();
-      })
-      .subscribe();
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, []);
-
-  async function fetchMenus() {
+  const fetchMenus = useCallback(async () => {
     const { data } = await supabase.from("menus").select("*");
 
     if (data) {
       setMenus(data);
     }
-  }
+  }, []);
+
+  /* eslint-disable react-hooks/set-state-in-effect */
+  useEffect(() => {
+    fetchMenus();
+
+    // Polling every 1 second for real-time feel
+    const interval = setInterval(() => {
+      fetchMenus();
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [fetchMenus]);
 
   async function addMenu() {
     if (!newMenu.trim()) {

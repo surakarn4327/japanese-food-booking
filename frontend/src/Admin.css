@@ -32,6 +32,37 @@ h1 {
   color: black;
 }
 
+.filterSection {
+  margin-bottom: 25px;
+}
+
+.filterControls {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.filterControls .filterSelect,
+.filterControls .sortSelect {
+  flex: 1;
+  min-width: 200px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 2px solid #ddd;
+  font-size: 16px;
+  background: white;
+  color: black;
+}
+
+.sortSelect {
+  padding: 12px;
+  border-radius: 12px;
+  border: 2px solid #ddd;
+  font-size: 16px;
+  background: white;
+  color: black;
+}
+
 .menuManage {
   background: white;
 
@@ -188,6 +219,12 @@ span {
   min-width: 250px;
 }
 
+.navButtons {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
 .navLink {
   padding: 12px 20px;
   background: #d60000;
@@ -198,10 +235,19 @@ span {
   font-weight: 500;
   cursor: pointer;
   transition: background 0.3s;
+  border: none;
 }
 
 .navLink:hover {
   background: #b80000;
+}
+
+.deleteAllBtn {
+  background: #ff6b6b;
+}
+
+.deleteAllBtn:hover {
+  background: #ee5a52;
 }
 
 .ordersContainer {
@@ -221,4 +267,127 @@ span {
   display: flex;
   flex-direction: column;
   gap: 10px;
+}
+
+.toast {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto 20px;
+  padding: 16px 18px;
+  border-radius: 16px;
+  font-weight: 600;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+.toast.success {
+  background: #ecf9f1;
+  color: #1f7c3d;
+  border: 1px solid #8ad89b;
+}
+
+.toast.error {
+  background: #fdecea;
+  color: #9d2f2f;
+  border: 1px solid #f2a5a5;
+}
+
+.bookingStatus {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  padding: 10px 16px;
+  border-radius: 14px;
+  font-weight: 600;
+}
+
+.bookingStatus.open {
+  background: #ecf9f1;
+  color: #1f7c3d;
+  border: 1px solid #8ad89b;
+}
+
+.bookingStatus.closed {
+  background: #fff2f2;
+  color: #9d2f2f;
+  border: 1px solid #f2a5a5;
+}
+
+.statusBtn.open {
+  background: #1f7c3d;
+}
+
+.statusBtn.closed {
+  background: #9d2f2f;
+}
+
+.statusBtn.open:hover {
+  background: #176734;
+}
+
+.statusBtn.closed:hover {
+  background: #7a2c2c;
+}
+
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  background: rgba(0, 0, 0, 0.35);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.confirmModal {
+  width: 100%;
+  max-width: 420px;
+  background: white;
+  border-radius: 24px;
+  padding: 24px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+.confirmModal h2 {
+  margin-top: 0;
+  color: #d60000;
+}
+
+.confirmModal p {
+  margin: 16px 0 24px;
+  color: #333;
+}
+
+.confirmActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.cancelBtn,
+.confirmBtn {
+  padding: 12px 18px;
+  border-radius: 12px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.cancelBtn {
+  background: #f2f2f2;
+  color: #333;
+}
+
+.confirmBtn {
+  background: #d60000;
+  color: white;
+}
+
+.cancelBtn:hover {
+  background: #e2e2e2;
+}
+
+.confirmBtn:hover {
+  background: #b80000;
 }

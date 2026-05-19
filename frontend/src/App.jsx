@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { supabase } from "./supabase";
 import "./App.css";
 
@@ -13,17 +13,19 @@ function App() {
 
   const [note, setNote] = useState("");
 
-  useEffect(() => {
-    fetchMenus();
-  }, []);
-
-  async function fetchMenus() {
+  const fetchMenus = useCallback(async () => {
     const { data } = await supabase.from("menus").select("*");
 
     if (data) {
       setMenus(data);
     }
-  }
+  }, []);
+
+  /* eslint-disable react-hooks/set-state-in-effect */
+  useEffect(() => {
+    fetchMenus();
+  }, [fetchMenus]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   function handleCheckbox(menuName) {
     if (selectedMenus.includes(menuName)) {
