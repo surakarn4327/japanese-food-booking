@@ -324,14 +324,14 @@ h3 {
   display: block;
   color: #3a3a3a;
   font-weight: 800;
-  font-size: 2rem;
+  font-size: 1rem;
 }
 
 .modalDetailRow span {
   display: block;
   text-align: right;
   color: #101010;
-  font-size: 2rem;
+  font-size: 1rem;
 }
 
 .modalBody {
