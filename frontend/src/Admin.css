@@ -171,3 +171,54 @@ span {
 .deleteMenuBtn:hover {
   background: #b80000;
 }
+
+/* Navigation Styles */
+.adminNav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.adminNav h1 {
+  margin: 0;
+  flex: 1;
+  min-width: 250px;
+}
+
+.navLink {
+  padding: 12px 20px;
+  background: #d60000;
+  color: white;
+  text-decoration: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.navLink:hover {
+  background: #b80000;
+}
+
+.ordersContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.emptyMessage {
+  text-align: center;
+  color: #999;
+  font-size: 18px;
+  padding: 40px 20px;
+}
+
+.menuList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
