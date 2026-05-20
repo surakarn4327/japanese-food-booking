@@ -464,8 +464,9 @@ body {
 }
 
 .modalFooter.largeText {
-  font-size: 4rem;
-  letter-spacing: 0.02em;
+  font-size: 3.2rem;
+  line-height: 1.18;
+  letter-spacing: 0;
 }
 
 .confirmActions {
@@ -677,7 +678,7 @@ body {
   }
 
   .modalFooter.largeText {
-    font-size: 2rem;
+    font-size: 1.65rem;
     letter-spacing: 0;
   }
 
@@ -711,6 +712,6 @@ body {
   }
 
   .modalFooter.largeText {
-    font-size: 1.65rem;
+    font-size: 1.42rem;
   }
 }

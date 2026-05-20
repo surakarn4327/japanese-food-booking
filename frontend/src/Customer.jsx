@@ -60,6 +60,11 @@ function Customer() {
     fetchOrderCounts();
     fetchBookingStatus();
 
+    function refreshAvailability() {
+      fetchMenus();
+      fetchOrderCounts();
+    }
+
     const bookingChannel = supabase
       .channel("booking-status")
       .on(
@@ -87,7 +92,7 @@ function Customer() {
           table: "orders",
         },
         () => {
-          fetchOrderCounts();
+          refreshAvailability();
         },
       )
       .subscribe();
@@ -102,18 +107,23 @@ function Customer() {
           table: "menus",
         },
         () => {
-          fetchMenus();
+          refreshAvailability();
         },
       )
       .subscribe();
 
     const interval = setInterval(() => {
       fetchBookingStatus();
-      fetchOrderCounts();
-    }, 5000);
+      refreshAvailability();
+    }, 1000);
+
+    window.addEventListener("focus", refreshAvailability);
+    document.addEventListener("visibilitychange", refreshAvailability);
 
     return () => {
       clearInterval(interval);
+      window.removeEventListener("focus", refreshAvailability);
+      document.removeEventListener("visibilitychange", refreshAvailability);
       supabase.removeChannel(bookingChannel);
       supabase.removeChannel(ordersChannel);
       supabase.removeChannel(menusChannel);
@@ -194,6 +204,17 @@ function Customer() {
     const orderClassroom = isTeacher ? "ครู" : classroom;
 
     try {
+      const latestCounts = await fetchOrderCounts();
+      const soldOutSelections = getSoldOutSelections(latestCounts);
+
+      if (soldOutSelections.length > 0) {
+        setSelectedMenus((currentMenus) =>
+          currentMenus.filter((menuName) => !soldOutSelections.includes(menuName)),
+        );
+        showToast("error", `เมนู ${soldOutSelections.join(", ")} หมดแล้วค่ะ`);
+        return false;
+      }
+
       const { error } = await supabase.from("orders").insert([
         {
           customer_name: customerName,
@@ -233,11 +254,11 @@ function Customer() {
 
     let pickupMessage = "";
     if (isTeacher) {
-      pickupMessage = "กรุณามารับอาหารตามเวลาที่สะดวกค่ะ";
+      pickupMessage = "กรุณามารับภายใน 12:30\u00A0น.";
     } else if (grade >= 1 && grade <= 3) {
-      pickupMessage = "กรุณามารับก่อน 11:30 น.\nมิฉะนั้นจะถือว่าสละสิทธิ์";
+      pickupMessage = "กรุณามารับก่อน 11:30\u00A0น.\nมิฉะนั้นจะถือว่าสละสิทธิ์";
     } else if (grade >= 4 && grade <= 6) {
-      pickupMessage = "กรุณามารับก่อน 12:20 น.\nมิฉะนั้นจะถือว่าสละสิทธิ์";
+      pickupMessage = "กรุณามารับก่อน 12:20\u00A0น.\nมิฉะนั้นจะถือว่าสละสิทธิ์";
     }
 
     if (pickupMessage) {
