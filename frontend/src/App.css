@@ -150,6 +150,17 @@ body {
   background: #fff5f5;
 }
 
+.menuItem.soldOut {
+  cursor: not-allowed;
+  border-color: #dddddd;
+  background: #f7f7f7;
+  color: #777777;
+}
+
+.menuItem.soldOut:not(.active) {
+  opacity: 0.72;
+}
+
 .menuItem input {
   flex: 0 0 auto;
   width: 20px;
@@ -163,6 +174,18 @@ body {
   overflow-wrap: anywhere;
   font-size: 1rem;
   font-weight: 650;
+}
+
+.soldOutBadge {
+  flex: 0 0 auto;
+  margin-left: auto;
+  padding: 5px 9px;
+  border-radius: 999px;
+  color: #9d2f2f;
+  background: #fdecea;
+  border: 1px solid #f2a5a5;
+  font-size: 0.86rem;
+  line-height: 1.2;
 }
 
 .textarea {
@@ -437,6 +460,7 @@ body {
   font-size: 2rem;
   color: #d60000;
   font-weight: 900;
+  white-space: pre-line;
 }
 
 .modalFooter.largeText {
@@ -546,6 +570,11 @@ body {
 
   .menuItem span {
     font-size: 0.98rem;
+  }
+
+  .soldOutBadge {
+    padding: 5px 8px;
+    font-size: 0.82rem;
   }
 
   .textarea {

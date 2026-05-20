@@ -4,6 +4,7 @@ import "./App.css";
 
 function Customer() {
   const [menus, setMenus] = useState([]);
+  const [orderCounts, setOrderCounts] = useState({});
   const [customerName, setCustomerName] = useState("");
   const [classroom, setClassroom] = useState("");
   const [isTeacher, setIsTeacher] = useState(false);
@@ -19,6 +20,22 @@ function Customer() {
     if (data) {
       setMenus(data);
     }
+  }, []);
+
+  const fetchOrderCounts = useCallback(async () => {
+    const { data } = await supabase.from("orders").select("menu_names");
+    const counts = {};
+
+    if (data) {
+      data.forEach((order) => {
+        (order.menu_names || []).forEach((menuName) => {
+          counts[menuName] = (counts[menuName] || 0) + 1;
+        });
+      });
+    }
+
+    setOrderCounts(counts);
+    return counts;
   }, []);
 
   const fetchBookingStatus = useCallback(async () => {
@@ -40,6 +57,7 @@ function Customer() {
   /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     fetchMenus();
+    fetchOrderCounts();
     fetchBookingStatus();
 
     const bookingChannel = supabase
@@ -59,13 +77,48 @@ function Customer() {
       )
       .subscribe();
 
-    const interval = setInterval(fetchBookingStatus, 5000);
+    const ordersChannel = supabase
+      .channel("customer-order-counts")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "orders",
+        },
+        () => {
+          fetchOrderCounts();
+        },
+      )
+      .subscribe();
+
+    const menusChannel = supabase
+      .channel("customer-menus")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "menus",
+        },
+        () => {
+          fetchMenus();
+        },
+      )
+      .subscribe();
+
+    const interval = setInterval(() => {
+      fetchBookingStatus();
+      fetchOrderCounts();
+    }, 5000);
 
     return () => {
       clearInterval(interval);
       supabase.removeChannel(bookingChannel);
+      supabase.removeChannel(ordersChannel);
+      supabase.removeChannel(menusChannel);
     };
-  }, [fetchBookingStatus, fetchMenus]);
+  }, [fetchBookingStatus, fetchMenus, fetchOrderCounts]);
 
   function showToast(type, text) {
     setToast({ type, text });
@@ -84,7 +137,24 @@ function Customer() {
     setModalData(null);
   }
 
-  function handleCheckbox(menuName) {
+  function getMenuLimit(menu) {
+    const limit = Number(menu.queue_limit);
+    return Number.isFinite(limit) && limit > 0 ? limit : null;
+  }
+
+  function isMenuSoldOut(menu, counts = orderCounts) {
+    const limit = getMenuLimit(menu);
+    return limit !== null && (counts[menu.name] || 0) >= limit;
+  }
+
+  function handleCheckbox(menu) {
+    const menuName = menu.name;
+
+    if (!selectedMenus.includes(menuName) && isMenuSoldOut(menu)) {
+      showToast("error", "เมนูนี้หมดแล้วค่ะ");
+      return;
+    }
+
     if (selectedMenus.includes(menuName)) {
       setSelectedMenus(selectedMenus.filter((item) => item !== menuName));
     } else {
@@ -110,6 +180,13 @@ function Customer() {
   function isValidClassroomFormat(classroom) {
     const trimmed = classroom.trim();
     return /^(?:ม\s*\.?\s*)?[1-6]\s*\/\s*\d+$/i.test(trimmed);
+  }
+
+  function getSoldOutSelections(counts = orderCounts) {
+    return selectedMenus.filter((menuName) => {
+      const menu = menus.find((item) => item.name === menuName);
+      return menu ? isMenuSoldOut(menu, counts) : false;
+    });
   }
 
   async function submitOrder() {
@@ -158,9 +235,9 @@ function Customer() {
     if (isTeacher) {
       pickupMessage = "กรุณามารับอาหารตามเวลาที่สะดวกค่ะ";
     } else if (grade >= 1 && grade <= 3) {
-      pickupMessage = "กรุณามารับก่อน 11:30 น.";
+      pickupMessage = "กรุณามารับก่อน 11:30 น.\nมิฉะนั้นจะถือว่าสละสิทธิ์";
     } else if (grade >= 4 && grade <= 6) {
-      pickupMessage = "กรุณามารับก่อน 12:30 น.";
+      pickupMessage = "กรุณามารับก่อน 12:20 น.\nมิฉะนั้นจะถือว่าสละสิทธิ์";
     }
 
     if (pickupMessage) {
@@ -200,6 +277,17 @@ function Customer() {
         "error",
         "รูปแบบชั้นเรียนไม่ถูกต้อง กรุณากรอกเป็น เลข/เลข หรือ ม.เลข/เลข หรือ มเลข/เลข",
       );
+      return;
+    }
+
+    const latestCounts = await fetchOrderCounts();
+    const soldOutSelections = getSoldOutSelections(latestCounts);
+
+    if (soldOutSelections.length > 0) {
+      setSelectedMenus((currentMenus) =>
+        currentMenus.filter((menuName) => !soldOutSelections.includes(menuName)),
+      );
+      showToast("error", `เมนู ${soldOutSelections.join(", ")} หมดแล้วค่ะ`);
       return;
     }
 
@@ -270,23 +358,29 @@ function Customer() {
             <div className="menuBox">
               <h3>เลือกเมนู * เลือกหลายเมนูได้ *</h3>
 
-              {menus.map((menu) => (
-                <label
-                  key={menu.id}
-                  className={`menuItem ${
-                    selectedMenus.includes(menu.name) ? "active" : ""
-                  }`}
-                >
-                  <input
-                    type="checkbox"
-                    checked={selectedMenus.includes(menu.name)}
-                    onChange={() => handleCheckbox(menu.name)}
-                    disabled={isLoading}
-                  />
+              {menus.map((menu) => {
+                const selected = selectedMenus.includes(menu.name);
+                const soldOut = isMenuSoldOut(menu);
 
-                  <span>{menu.name}</span>
-                </label>
-              ))}
+                return (
+                  <label
+                    key={menu.id}
+                    className={`menuItem ${selected ? "active" : ""} ${
+                      soldOut ? "soldOut" : ""
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selected}
+                      onChange={() => handleCheckbox(menu)}
+                      disabled={isLoading || (soldOut && !selected)}
+                    />
+
+                    <span>{menu.name}</span>
+                    {soldOut && <strong className="soldOutBadge">หมด</strong>}
+                  </label>
+                );
+              })}
             </div>
 
             <textarea

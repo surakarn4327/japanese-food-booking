@@ -191,7 +191,8 @@ body {
 
 .filterSelect,
 .sortSelect,
-.menuInput {
+.menuInput,
+.menuLimitInput {
   width: 100%;
   min-height: 48px;
   padding: 12px 14px;
@@ -206,7 +207,8 @@ body {
 
 .filterSelect:focus,
 .sortSelect:focus,
-.menuInput:focus {
+.menuInput:focus,
+.menuLimitInput:focus {
   outline: none;
   border-color: #c80000;
   box-shadow: 0 0 0 3px rgba(200, 0, 0, 0.1);
@@ -303,6 +305,10 @@ body {
   margin-bottom: 18px;
 }
 
+.menuAddBox.limit {
+  grid-template-columns: minmax(0, 1fr) minmax(130px, 180px) auto;
+}
+
 .addBtn {
   padding: 12px 20px;
   color: #ffffff;
@@ -325,7 +331,23 @@ body {
   background: #fafafa;
 }
 
-.menuManageItem span {
+.menuManageItem.limit {
+  grid-template-columns: minmax(0, 1fr) minmax(130px, 170px) auto;
+}
+
+.menuManageItem.soldOut {
+  border-color: #f2a5a5;
+  background: #fff6f6;
+}
+
+.menuManageInfo {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.menuManageItem span,
+.menuManageInfo span {
   min-width: 0;
   color: #171717;
   font-size: 1rem;
@@ -333,11 +355,43 @@ body {
   overflow-wrap: anywhere;
 }
 
+.menuManageInfo small {
+  color: #666666;
+  font-size: 0.92rem;
+  font-weight: 650;
+  line-height: 1.35;
+}
+
+.menuManageItem.soldOut .menuManageInfo small {
+  color: #9d2f2f;
+}
+
+.menuLimitField {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.menuLimitField span {
+  color: #555555;
+  font-size: 0.82rem;
+  font-weight: 750;
+}
+
+.menuLimitInput {
+  min-height: 44px;
+}
+
 .deleteMenuBtn {
   min-height: 40px;
   padding: 9px 14px;
   color: #ffffff;
   background: #c80000;
+}
+
+.deleteMenuBtn:disabled {
+  cursor: wait;
+  opacity: 0.7;
 }
 
 .toast {
@@ -482,6 +536,11 @@ body {
     grid-template-columns: 1fr;
   }
 
+  .menuAddBox.limit,
+  .menuManageItem.limit {
+    grid-template-columns: 1fr;
+  }
+
   .addBtn {
     width: 100%;
   }
@@ -512,10 +571,19 @@ body {
   .filterSelect,
   .sortSelect,
   .menuInput,
+  .menuLimitInput,
   .deleteBtn,
   .addBtn {
     min-height: 52px;
     font-size: 1rem;
+  }
+
+  .menuManageItem {
+    align-items: stretch;
+  }
+
+  .deleteMenuBtn {
+    min-height: 48px;
   }
 
   .orderCard {
