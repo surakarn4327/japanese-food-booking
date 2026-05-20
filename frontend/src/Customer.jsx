@@ -458,7 +458,14 @@ function Customer() {
               </p>
               {modalData.footerText && (
                 <div className="modalFooter largeText">
-                  {modalData.footerText}
+                  {modalData.footerText.split("\n").map((line, index) => (
+                    <span
+                      key={index}
+                      className={index === 0 ? "modalFooterTime" : "modalFooterNote"}
+                    >
+                      {line}
+                    </span>
+                  ))}
                 </div>
               )}
             </div>

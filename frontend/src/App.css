@@ -469,6 +469,17 @@ body {
   letter-spacing: 0;
 }
 
+.modalFooterTime,
+.modalFooterNote {
+  display: block;
+}
+
+.modalFooterNote {
+  margin-top: 18px;
+  font-size: 0.58em;
+  line-height: 1.28;
+}
+
 .confirmActions {
   display: flex;
   flex-wrap: wrap;

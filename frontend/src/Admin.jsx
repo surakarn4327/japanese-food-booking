@@ -6,6 +6,7 @@ import "./Admin.css";
 function Admin() {
   const [orders, setOrders] = useState([]);
   const [selectedMenu, setSelectedMenu] = useState("ทั้งหมด");
+  const [selectedGroup, setSelectedGroup] = useState("all");
   const [sortOrder, setSortOrder] = useState("newest");
   const [bookingOpen, setBookingOpen] = useState(true);
   const [savingStatus, setSavingStatus] = useState(false);
@@ -145,12 +146,56 @@ function Admin() {
     ...new Set(orders.flatMap((order) => order.menu_names || [])),
   ];
 
-  const filteredOrders = orders.filter((order) => {
-    if (selectedMenu === "ทั้งหมด") {
-      return true;
+  function getGradeFromClassroom(classroom) {
+    const trimmed = String(classroom || "").trim();
+    const match = trimmed.match(/^(?:ม\s*\.?\s*)?([1-6])\s*\/\s*\d+$/i);
+    return match ? Number(match[1]) : null;
+  }
+
+  function getOrderGroup(order) {
+    const classroom = String(order.classroom || "").trim();
+
+    if (classroom.includes("ครู")) {
+      return "teacher";
     }
-    return order.menu_names?.includes(selectedMenu);
+
+    const grade = getGradeFromClassroom(classroom);
+
+    if (grade >= 1 && grade <= 3) {
+      return "lower";
+    }
+
+    if (grade >= 4 && grade <= 6) {
+      return "upper";
+    }
+
+    return "other";
+  }
+
+  const filteredOrders = orders.filter((order) => {
+    const matchesMenu =
+      selectedMenu === "ทั้งหมด" || order.menu_names?.includes(selectedMenu);
+    const matchesGroup =
+      selectedGroup === "all" || getOrderGroup(order) === selectedGroup;
+
+    return matchesMenu && matchesGroup;
   });
+
+  function getEmptyMessage() {
+    if (orders.length === 0) {
+      return "ไม่มีออเดอร์";
+    }
+
+    if (selectedMenu !== "ทั้งหมด" && selectedGroup !== "all") {
+      return "ไม่มีออเดอร์ของเมนูและกลุ่มนี้";
+    }
+
+    if (selectedMenu !== "ทั้งหมด") {
+      return "ไม่มีออเดอร์ของเมนูนี้";
+    }
+
+    return "ไม่มีออเดอร์ของกลุ่มนี้";
+  }
 
   return (
     <div className="adminContainer">
@@ -205,6 +250,17 @@ function Admin() {
           </select>
 
           <select
+            className="filterSelect"
+            value={selectedGroup}
+            onChange={(e) => setSelectedGroup(e.target.value)}
+          >
+            <option value="all">ทั้งหมด</option>
+            <option value="teacher">ครู</option>
+            <option value="lower">ม.ต้น</option>
+            <option value="upper">ม.ปลาย</option>
+          </select>
+
+          <select
             className="sortSelect"
             value={sortOrder}
             onChange={(e) => setSortOrder(e.target.value)}
@@ -217,9 +273,7 @@ function Admin() {
 
       <div className="ordersContainer">
         {filteredOrders.length === 0 ? (
-          <p className="emptyMessage">
-            {orders.length === 0 ? "ไม่มีออเดอร์" : "ไม่มีออเดอร์ของเมนูนี้"}
-          </p>
+          <p className="emptyMessage">{getEmptyMessage()}</p>
         ) : (
           filteredOrders.map((order, index) => {
             const queueNumber =
