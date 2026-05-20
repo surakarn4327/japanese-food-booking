@@ -78,6 +78,40 @@ body {
   border: 2px solid #d60000;
 }
 
+.teacherOption {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: fit-content;
+  min-height: 40px;
+  margin: -4px 0 18px;
+  padding: 8px 12px;
+  border: 2px solid #eeeeee;
+  border-radius: 12px;
+  color: black;
+  background: white;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.teacherOption.active {
+  border-color: #d60000;
+  background: #fff5f5;
+}
+
+.teacherOption input {
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+  accent-color: #d60000;
+}
+
+.teacherOption span {
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
 .menuBox {
   margin-bottom: 20px;
 }
@@ -479,6 +513,18 @@ body {
     margin-bottom: 12px;
     border-radius: 12px;
     font-size: 16px;
+  }
+
+  .teacherOption {
+    min-height: 42px;
+    margin: -2px 0 14px;
+    padding: 8px 12px;
+    border-radius: 12px;
+  }
+
+  .teacherOption input {
+    width: 22px;
+    height: 22px;
   }
 
   .menuBox {

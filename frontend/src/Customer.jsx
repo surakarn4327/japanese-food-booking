@@ -6,6 +6,7 @@ function Customer() {
   const [menus, setMenus] = useState([]);
   const [customerName, setCustomerName] = useState("");
   const [classroom, setClassroom] = useState("");
+  const [isTeacher, setIsTeacher] = useState(false);
   const [selectedMenus, setSelectedMenus] = useState([]);
   const [note, setNote] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -91,6 +92,15 @@ function Customer() {
     }
   }
 
+  function handleTeacherChange(event) {
+    const checked = event.target.checked;
+    setIsTeacher(checked);
+
+    if (checked) {
+      setClassroom("");
+    }
+  }
+
   function getGradeFromClassroom(classroom) {
     const trimmed = classroom.trim();
     const match = trimmed.match(/^(?:ม\s*\.?\s*)?([1-6])\s*\/\s*\d+$/i);
@@ -104,12 +114,13 @@ function Customer() {
 
   async function submitOrder() {
     setIsLoading(true);
+    const orderClassroom = isTeacher ? "ครู" : classroom;
 
     try {
       const { error } = await supabase.from("orders").insert([
         {
           customer_name: customerName,
-          classroom: classroom,
+          classroom: orderClassroom,
           menu_names: selectedMenus,
           note: note,
         },
@@ -124,6 +135,7 @@ function Customer() {
       showToast("success", "จองสำเร็จแล้ว ขอบคุณมากค่ะ");
       setCustomerName("");
       setClassroom("");
+      setIsTeacher(false);
       setSelectedMenus([]);
       setNote("");
       return true;
@@ -143,7 +155,9 @@ function Customer() {
     }
 
     let pickupMessage = "";
-    if (grade >= 1 && grade <= 3) {
+    if (isTeacher) {
+      pickupMessage = "กรุณามารับอาหารตามเวลาที่สะดวกค่ะ";
+    } else if (grade >= 1 && grade <= 3) {
       pickupMessage = "กรุณามารับก่อน 11:30 น.";
     } else if (grade >= 4 && grade <= 6) {
       pickupMessage = "กรุณามารับก่อน 12:30 น.";
@@ -155,7 +169,7 @@ function Customer() {
         message: "กรุณาแคปหน้าจอเพื่อเป็นหลักฐานการจอง",
         details: [
           { label: "ชื่อเล่น", value: customerName },
-          { label: "ชั้น", value: classroom },
+          { label: "ชั้น", value: isTeacher ? "ครู" : classroom },
           { label: "เมนูที่เลือก", value: selectedMenus.join(", ") },
           { label: "เพิ่มเติม", value: note || "-" },
         ],
@@ -176,12 +190,12 @@ function Customer() {
       return;
     }
 
-    if (!customerName || !classroom || selectedMenus.length === 0) {
+    if (!customerName || (!isTeacher && !classroom) || selectedMenus.length === 0) {
       showToast("error", "กรุณากรอกข้อมูลให้ครบทุกช่อง");
       return;
     }
 
-    if (!isValidClassroomFormat(classroom)) {
+    if (!isTeacher && !isValidClassroomFormat(classroom)) {
       showToast(
         "error",
         "รูปแบบชั้นเรียนไม่ถูกต้อง กรุณากรอกเป็น เลข/เลข หรือ ม.เลข/เลข หรือ มเลข/เลข",
@@ -189,15 +203,16 @@ function Customer() {
       return;
     }
 
-    const grade = getGradeFromClassroom(classroom);
+    const grade = isTeacher ? null : getGradeFromClassroom(classroom);
     const selectedMenusText = selectedMenus.join(", ");
+    const classroomText = isTeacher ? "ครู" : classroom;
 
     openModal({
       title: "ตรวจสอบข้อมูลก่อนยืนยัน",
       message: "กรุณาตรวจสอบข้อมูลก่อนกดตกลงจอง",
       details: [
         { label: "ชื่อเล่น", value: customerName },
-        { label: "ชั้น", value: classroom },
+        { label: "ชั้น", value: classroomText },
         { label: "เมนูที่เลือก", value: selectedMenusText },
         { label: "เพิ่มเติม", value: note || "-" },
       ],
@@ -239,8 +254,18 @@ function Customer() {
               placeholder="ชั้น เช่น 5/6"
               value={classroom}
               onChange={(e) => setClassroom(e.target.value)}
-              disabled={isLoading}
+              disabled={isLoading || isTeacher}
             />
+
+            <label className={`teacherOption ${isTeacher ? "active" : ""}`}>
+              <input
+                type="checkbox"
+                checked={isTeacher}
+                onChange={handleTeacherChange}
+                disabled={isLoading}
+              />
+              <span>ครู</span>
+            </label>
 
             <div className="menuBox">
               <h3>เลือกเมนู * เลือกหลายเมนูได้ *</h3>
