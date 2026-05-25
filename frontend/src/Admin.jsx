@@ -7,6 +7,7 @@ function Admin() {
   const [orders, setOrders] = useState([]);
   const [selectedMenu, setSelectedMenu] = useState("ทั้งหมด");
   const [selectedGroup, setSelectedGroup] = useState("all");
+  const [nameSearch, setNameSearch] = useState("");
   const [sortOrder, setSortOrder] = useState("newest");
   const [bookingOpen, setBookingOpen] = useState(true);
   const [savingStatus, setSavingStatus] = useState(false);
@@ -173,17 +174,24 @@ function Admin() {
   }
 
   const filteredOrders = orders.filter((order) => {
+    const searchText = nameSearch.trim().toLowerCase();
+    const customerName = String(order.customer_name || "").toLowerCase();
     const matchesMenu =
       selectedMenu === "ทั้งหมด" || order.menu_names?.includes(selectedMenu);
     const matchesGroup =
       selectedGroup === "all" || getOrderGroup(order) === selectedGroup;
+    const matchesName = searchText === "" || customerName.includes(searchText);
 
-    return matchesMenu && matchesGroup;
+    return matchesMenu && matchesGroup && matchesName;
   });
 
   function getEmptyMessage() {
     if (orders.length === 0) {
       return "ไม่มีออเดอร์";
+    }
+
+    if (nameSearch.trim()) {
+      return "ไม่พบชื่อที่ค้นหา";
     }
 
     if (selectedMenu !== "ทั้งหมด" && selectedGroup !== "all") {
@@ -259,6 +267,14 @@ function Admin() {
             <option value="lower">ม.ต้น</option>
             <option value="upper">ม.ปลาย</option>
           </select>
+
+          <input
+            className="filterInput"
+            type="search"
+            placeholder="ค้นหาชื่อ"
+            value={nameSearch}
+            onChange={(e) => setNameSearch(e.target.value)}
+          />
 
           <select
             className="sortSelect"

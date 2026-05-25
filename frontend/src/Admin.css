@@ -185,12 +185,13 @@ body {
 
 .filterControls {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 12px;
 }
 
 .filterSelect,
 .sortSelect,
+.filterInput,
 .menuInput,
 .menuLimitInput {
   width: 100%;
@@ -207,6 +208,7 @@ body {
 
 .filterSelect:focus,
 .sortSelect:focus,
+.filterInput:focus,
 .menuInput:focus,
 .menuLimitInput:focus {
   outline: none;
@@ -570,6 +572,7 @@ body {
   .navLink,
   .filterSelect,
   .sortSelect,
+  .filterInput,
   .menuInput,
   .menuLimitInput,
   .deleteBtn,
